@@ -1,0 +1,114 @@
+Method: chinese_whispers
+  ARI:
+    Iter-1: {'quantile': 6, 'dataset': 'en-en', 'binarize': False, 'weighting': 'lin'}
+    Iter-2: {'quantile': 5, 'dataset': 'ru-ru', 'binarize': False, 'weighting': 'lin'}
+    Iter-3: {'quantile': 0, 'dataset': 'rusemshift-train', 'binarize': False, 'weighting': 'lin'}
+    Iter-4: {'quantile': 5, 'dataset': 'rusemshift-finetune', 'binarize': False, 'weighting': 'lin'}
+    Iter-5: {'quantile': 5, 'dataset': 'en-en', 'binarize': False, 'weighting': 'log'}
+ Spr_LSCD:
+    Iter-1: {'quantile': 4, 'dataset': 'rusemshift-finetune', 'binarize': False, 'weighting': 'lin'}
+    Iter-2: {'quantile': 5, 'dataset': 'en-en', 'binarize': False, 'weighting': 'log'}
+    Iter-3: {'quantile': 6, 'dataset': 'rusemshift-finetune', 'binarize': False, 'weighting': 'lin'}
+    Iter-4: {'quantile': 4, 'dataset': 'rusemshift-finetune', 'binarize': False, 'weighting': 'lin'}
+    Iter-5: {'quantile': 4, 'dataset': 'rusemshift-finetune', 'binarize': False, 'weighting': 'lin'}
+
+Method: correlation_clustering
+  ARI:
+    Iter-1: {'quantile': 1, 'dataset': 'en-en', 'binarize': False}
+    Iter-2: {'quantile': 1, 'dataset': 'en-en', 'binarize': False}
+    Iter-3: {'quantile': 1, 'dataset': 'en-en', 'binarize': False}
+    Iter-4: {'quantile': 1, 'dataset': 'en-en', 'binarize': False}
+    Iter-5: {'quantile': 1, 'dataset': 'en-en', 'binarize': False}
+ Spr_LSCD:
+    Iter-1: {'quantile': 2, 'dataset': 'rusemshift-finetune', 'binarize': False}
+    Iter-2: {'quantile': 2, 'dataset': 'rusemshift-finetune', 'binarize': False}
+    Iter-3: {'quantile': 3, 'dataset': 'rusemshift-finetune', 'binarize': False}
+    Iter-4: {'quantile': 1, 'dataset': 'rusemshift-finetune', 'binarize': False}
+    Iter-5: {'quantile': 4, 'dataset': 'rusemshift-finetune', 'binarize': False}
+
+Method: wsbm
+  ARI:
+    Iter-1: {'quantile': 1, 'dataset': 'en-en', 'binarize': False, 'distribution': 'real-exponential'}
+    Iter-2: {'quantile': 1, 'dataset': 'en-en', 'binarize': False, 'distribution': 'real-exponential'}
+    Iter-3: {'quantile': 0, 'dataset': 'rusemshift-finetune', 'binarize': False, 'distribution': 'real-exponential'}
+    Iter-4: {'quantile': 5, 'dataset': 'rusemshift-finetune', 'binarize': False, 'distribution': 'real-exponential'}
+    Iter-5: {'quantile': 6, 'dataset': 'rusemshift-train', 'binarize': False, 'distribution': 'real-exponential'}
+ Spr_LSCD:
+    Iter-1: {'quantile': 5, 'dataset': 'rusemshift-finetune', 'binarize': False, 'distribution': 'real-exponential'}
+    Iter-2: {'quantile': 5, 'dataset': 'rusemshift-finetune', 'binarize': False, 'distribution': 'real-exponential'}
+    Iter-3: {'quantile': 6, 'dataset': 'rusemshift-finetune', 'binarize': False, 'distribution': 'real-normal'}
+    Iter-4: {'quantile': 6, 'dataset': 'en-en', 'binarize': False, 'distribution': 'real-normal'}
+    Iter-5: {'quantile': 6, 'dataset': 'rusemshift-finetune', 'binarize': False, 'distribution': 'real-normal'}
+
+Method: spectral_clustering
+  ARI:
+  silhouette
+    Iter-1: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-2: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 3.0, 'no_clusters_calinski': 3.0, 'no_clusters_eigengap': 1.0}
+    Iter-3: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-4: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-5: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+
+  calinski
+    Iter-1: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-2: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 3.0, 'no_clusters_calinski': 3.0, 'no_clusters_eigengap': 1.0}
+    Iter-3: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-4: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-5: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+
+  eigengap
+    Iter-1: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'rusemshift-finetune', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-2: {'binarize': True, 'quantile': 5, 'word_level_threshold': False, 'score_path': 'rusemshift-train', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-3: {'binarize': False, 'quantile': 0, 'word_level_threshold': False, 'score_path': 'rusemshift-train', 'no_clusters_silhouette': 3.8, 'no_clusters_calinski': 2.6, 'no_clusters_eigengap': 4.0}
+    Iter-4: {'binarize': False, 'quantile': 0, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 3.0}
+    Iter-5: {'binarize': False, 'quantile': 4, 'word_level_threshold': False, 'score_path': 'rusemshift-finetune', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 4.0, 'no_clusters_eigengap': 2.0}
+
+  silhouette_old
+    Iter-1: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-2: {'binarize': True, 'quantile': 4, 'word_level_threshold': False, 'score_path': 'ru-ru', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 3.0, 'no_clusters_eigengap': 1.0}
+    Iter-3: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-4: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-5: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+
+  calinski_old
+    Iter-1: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-2: {'binarize': True, 'quantile': 4, 'word_level_threshold': False, 'score_path': 'ru-ru', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 3.0, 'no_clusters_eigengap': 1.0}
+    Iter-3: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-4: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-5: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+
+  eigengap_old
+    Iter-1: {'binarize': False, 'quantile': 4, 'word_level_threshold': False, 'score_path': 'rusemshift-train', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-2: {'binarize': True, 'quantile': 4, 'word_level_threshold': False, 'score_path': 'ru-ru', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 3.0, 'no_clusters_eigengap': 1.0}
+    Iter-3: {'binarize': False, 'quantile': 4, 'word_level_threshold': False, 'score_path': 'rusemshift-train', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-4: {'binarize': False, 'quantile': 4, 'word_level_threshold': False, 'score_path': 'rusemshift-train', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-5: {'binarize': False, 'quantile': 4, 'word_level_threshold': False, 'score_path': 'rusemshift-train', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+
+  silhouette_new
+    Iter-1: {'binarize': False, 'quantile': 0, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 3.0}
+    Iter-2: {'binarize': True, 'quantile': 0, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 4.0, 'no_clusters_calinski': 3.8, 'no_clusters_eigengap': 1.0}
+    Iter-3: {'binarize': True, 'quantile': 5, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 3.0}
+    Iter-4: {'binarize': True, 'quantile': 0, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 3.0}
+    Iter-5: {'binarize': False, 'quantile': 4, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+
+  calinski_new
+    Iter-1: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-2: {'binarize': False, 'quantile': 4, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 4.0, 'no_clusters_calinski': 3.0, 'no_clusters_eigengap': 1.0}
+    Iter-3: {'binarize': False, 'quantile': 4, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-4: {'binarize': False, 'quantile': 4, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-5: {'binarize': False, 'quantile': 4, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+
+  eigengap_new
+    Iter-1: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'rusemshift-finetune', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-2: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'ru-ru', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 3.0, 'no_clusters_eigengap': 1.0}
+    Iter-3: {'binarize': True, 'quantile': 0, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 3.0}
+    Iter-4: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'rusemshift-finetune', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-5: {'binarize': False, 'quantile': 3, 'word_level_threshold': False, 'score_path': 'rusemshift-finetune', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+
+ Spr_LSCD:
+    Iter-1: {'binarize': True, 'quantile': 5, 'word_level_threshold': False, 'score_path': 'rusemshift-finetune', 'no_clusters_silhouette': 4.4, 'no_clusters_calinski': 2.8, 'no_clusters_eigengap': 3.0}
+    Iter-2: {'binarize': False, 'quantile': 1, 'word_level_threshold': False, 'score_path': 'en-en', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 3.0, 'no_clusters_eigengap': 1.0}
+    Iter-3: {'binarize': False, 'quantile': 6, 'word_level_threshold': False, 'score_path': 'rusemshift-finetune', 'no_clusters_silhouette': 3.6, 'no_clusters_calinski': 3.6, 'no_clusters_eigengap': 1.0}
+    Iter-4: {'binarize': True, 'quantile': 4, 'word_level_threshold': False, 'score_path': 'rusemshift-finetune', 'no_clusters_silhouette': 2.0, 'no_clusters_calinski': 2.0, 'no_clusters_eigengap': 2.0}
+    Iter-5: {'binarize': True, 'quantile': 5, 'word_level_threshold': False, 'score_path': 'rusemshift-finetune', 'no_clusters_silhouette': 4.4, 'no_clusters_calinski': 2.8, 'no_clusters_eigengap': 3.0}
+

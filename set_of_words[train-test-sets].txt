@@ -1,0 +1,15 @@
+Iteration 1
+    Train set: ['überspannen', 'Manschette', 'Fuß', 'Rezeption', 'abgebrüht', 'Dynamik', 'Engpaß', 'abbauen', 'Abgesang', 'Knotenpunkt', 'Spielball', 'zersetzen', 'Armenhaus', 'Eintagsfliege', 'Titel', 'Schmiere', 'packen', 'artikulieren', 'abdecken']
+    Test set: ['Mißklang', 'Ohrwurm', 'Seminar', 'Sensation', 'ausspannen']
+Iteration 2
+    Train set: ['Manschette', 'Rezeption', 'abgebrüht', 'Dynamik', 'abbauen', 'Mißklang', 'Abgesang', 'Knotenpunkt', 'Spielball', 'zersetzen', 'Ohrwurm', 'Seminar', 'Sensation', 'Titel', 'Schmiere', 'ausspannen', 'packen', 'artikulieren', 'abdecken']
+    Test set: ['überspannen', 'Fuß', 'Engpaß', 'Armenhaus', 'Eintagsfliege']
+Iteration 3
+    Train set: ['überspannen', 'Fuß', 'Rezeption', 'Dynamik', 'Engpaß', 'abbauen', 'Mißklang', 'Abgesang', 'Knotenpunkt', 'Spielball', 'Armenhaus', 'Ohrwurm', 'Eintagsfliege', 'Seminar', 'Sensation', 'Schmiere', 'ausspannen', 'packen', 'abdecken']
+    Test set: ['Manschette', 'abgebrüht', 'zersetzen', 'Titel', 'artikulieren']
+Iteration 4
+    Train set: ['überspannen', 'Manschette', 'Fuß', 'abgebrüht', 'Dynamik', 'Engpaß', 'Mißklang', 'Spielball', 'zersetzen', 'Armenhaus', 'Ohrwurm', 'Eintagsfliege', 'Seminar', 'Sensation', 'Titel', 'Schmiere', 'ausspannen', 'artikulieren', 'abdecken']
+    Test set: ['Rezeption', 'abbauen', 'Abgesang', 'Knotenpunkt', 'packen']
+Iteration 5
+    Train set: ['überspannen', 'Manschette', 'Fuß', 'Rezeption', 'abgebrüht', 'Engpaß', 'abbauen', 'Mißklang', 'Abgesang', 'Knotenpunkt', 'zersetzen', 'Armenhaus', 'Ohrwurm', 'Eintagsfliege', 'Seminar', 'Sensation', 'Titel', 'ausspannen', 'packen', 'artikulieren']
+    Test set: ['Dynamik', 'Spielball', 'Schmiere', 'abdecken']
