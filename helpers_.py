@@ -1,9 +1,14 @@
 from ast import literal_eval as F
 import json
 from typing import TextIO, Union
+import sys
 
 import pandas as pd
 from scipy.stats import spearmanr
+
+
+CLUSTER_VALIDATION_METHODS = ["silhouette", "calinski", "eigengap"]
+V2 = "v2/"
 
 
 def splitted_data(data: pd.DataFrame, number_of_words: int):
@@ -15,10 +20,13 @@ def splitted_data(data: pd.DataFrame, number_of_words: int):
 
 
 def load_config_file():
-    with open("config/methods.json", "r") as f_in:
+    with open("config/config.json", "r") as f_in:
         data = json.load(f_in)
 
     return data
+
+
+CONFIG = load_config_file()
 
 
 def load_gold_data_semeval():
@@ -48,20 +56,27 @@ def select_words(list_of_words, index_of_words):
     return selected_words
 
 
-def prepare_data_for_spr(data, list_of_words, index_of_words):
+def prepare_data_for_spr(
+    data, list_of_words, index_of_words, sc_with_field: dict[str, str] = None
+):
     selected_words = select_words(list_of_words, index_of_words)
     gold_data = load_gold_change_graded_semeval()
     vector1 = [gold_data[word] for word in selected_words]
-    vector2 = [round(float(val), 2) for val in data["avg_jsd"].to_list()]
+    if sc_with_field is None:
+        vector2 = [round(float(val), 2) for val in data["avg_jsd"].to_list()]
+    else:
+        vector2 = [
+            round(float(val), 2)
+            for val in data[f"avg_jsd_{sc_with_field['field']}"].to_list()
+        ]
 
     return vector1, vector2
 
 
 def get_avg_ari_subset_words_sc(data, config):
-    cluster_validation_method = ["silhouette", "calinski", "eigengap"]
     subset_data = data.copy()
 
-    for validation_method in cluster_validation_method:
+    for validation_method in CLUSTER_VALIDATION_METHODS:
         subset_data[f"avg_ari_{validation_method}"] = subset_data[
             config["spectral_clustering"][f"avg_ari_{validation_method}"]
         ].mean(axis=1)
@@ -75,13 +90,100 @@ def get_avg_ari_subset_words_sc(data, config):
     return subset_data
 
 
+def get_avg_jsd_subset_words_sc(data, config):
+    subset_data = data.copy()
+
+    for validation_method in CLUSTER_VALIDATION_METHODS:
+        subset_data[f"avg_jsd_{validation_method}"] = subset_data[
+            config["spectral_clustering"][f"avg_jsd_{validation_method}"]
+        ].mean(axis=1)
+
+    return subset_data
+
+
+def get_avg_number_clusters_predicted(data, method):
+    config = CONFIG["5-fold-cv"]
+    config = config[
+        "non_spectral_clustering" if method not in config else method
+    ]["include_extra_information"]
+    fields = config.keys()
+
+    for field in fields:
+        if field.startswith("avg"):
+            data[field] = data[config[field]].mean(axis=1)
+
+    return data
+
+
+def get_extra_fields_to_report(data, method, parameters):
+    config = CONFIG["5-fold-cv"]
+    config = config[
+        "non_spectral_clustering" if method not in config else method
+    ]["include_extra_information"]
+    fields = config.keys()
+
+    for field in fields:
+        if field.startswith("avg"):
+            parameters[field] = data[field].mean(axis=0)
+
+    return parameters
+
+
+def eval_spectral_clustering_method_changing_parameters(
+    data,
+    test_set,
+    best_configuration_for_ari_training,
+    best_configuration_for_jsd_training_set,
+    target_words,
+):
+    results_ari = {}
+    results_spr_lscd = {}
+
+    for validation_method in CLUSTER_VALIDATION_METHODS:
+        start = (
+            best_configuration_for_ari_training[f"index_{validation_method}"]
+            * 24
+        )
+        end = start + 24
+        subset_test_for_spr_lscd = (
+            data.loc[start : end - 1, :].iloc[test_set].copy()
+        )
+        gold_change_graded, jsd = prepare_data_for_spr(
+            subset_test_for_spr_lscd,
+            target_words,
+            test_set,
+            {"field": validation_method},
+        )
+        spr, _ = spearmanr(gold_change_graded, jsd)
+        results_spr_lscd[f"spr_lscd_{validation_method}"] = spr
+
+        start = (
+            best_configuration_for_jsd_training_set[
+                f"index_{validation_method}"
+            ]
+            * 24
+        )
+        end = start + end
+        subset_test_for_ari = (
+            data.loc[start : end - 1, :].iloc[test_set].copy()
+        )
+        results_ari[f"avg_ari_{validation_method}"] = subset_test_for_ari[
+            f"avg_ari_{validation_method}"
+        ].mean(axis=0)
+
+        results_ari[f"avg_ari_{validation_method}_old"] = 0.0
+        results_ari[f"avg_ari_{validation_method}_new"] = 0.0
+
+    return results_ari, results_spr_lscd
+
+
 def train_spectral_clustering_method(
     data: pd.DataFrame,
     config,
     training_set: list[int],
     list_of_words: list[str],
 ) -> tuple[dict, dict]:
-    best_result_ari = {
+    best_combination_for_ari = {
         "parameters_silhouette": {},
         "parameters_calinski": {},
         "parameters_eigengap": {},
@@ -110,54 +212,91 @@ def train_spectral_clustering_method(
         "index_calinski_new": -1,
         "index_eigengap_new": -1,
     }
-    best_result_jsd = {"parameters": [], "jsd": 0.0, "index": -1}
+    best_combination_for_spr_lscd = {
+        "parameters_silhouette": [],
+        "parameters_calinski": [],
+        "parameters_eigengap": [],
+        "spr_lscd_silhouette": 0.0,
+        "spr_lscd_calinski": 0.0,
+        "spr_lscd_eigengap": 0.0,
+        "index_silhouette": -1,
+        "index_calinski": -1,
+        "index_eigengap": -1,
+    }
     number_of_subset_of_words = -1
-    cluster_validation_methods = ["silhouette", "calinski", "eigengap"]
     data = get_avg_ari_subset_words_sc(data, config)
+    data = get_avg_jsd_subset_words_sc(data, config)
 
     for set_of_words in splitted_data(data, 24):
         number_of_subset_of_words += 1
         subset_training = set_of_words.iloc[training_set].copy()
         parameters = F(subset_training["parameters_r1"].to_list()[0])
         parameters.pop("word", None)
-
-        subset_training["avg_jsd"] = subset_training[
-            config["test"]["avg_jsd"]
-        ].mean(axis=1)
-
-        gold_data_graded_change, avg_jsd = prepare_data_for_spr(
-            subset_training, list_of_words, training_set
+        parameters["score_path"] = subset_training["score_path_r1"].to_list()[
+            0
+        ]
+        extra_fields_to_report = get_extra_fields_to_report(
+            subset_training, "spectral_clustering", parameters.copy()
         )
-        spr, _ = spearmanr(gold_data_graded_change, avg_jsd)
-        if spr > best_result_jsd["jsd"]:
-            best_result_jsd["jsd"] = spr
-            best_result_jsd["index"] = number_of_subset_of_words
-            best_result_jsd["parameters"] = parameters
+        parameters.pop("word_level_threshold", None)
 
-        for method in cluster_validation_methods:
+        for method in CLUSTER_VALIDATION_METHODS:
             avg = subset_training[f"avg_ari_{method}"].mean(axis=0)
-            if avg > best_result_ari[f"ari_{method}"]:
-                best_result_ari[f"ari_{method}"] = avg
-                best_result_ari[f"index_{method}"] = number_of_subset_of_words
-                best_result_ari[f"parameters_{method}"] = parameters
+            if avg > best_combination_for_ari[f"ari_{method}"]:
+                best_combination_for_ari[f"ari_{method}"] = avg
+                best_combination_for_ari[
+                    f"index_{method}"
+                ] = number_of_subset_of_words
+                parameters[
+                    f"avg_number_cluster_selected_by_{method}"
+                ] = extra_fields_to_report[
+                    f"avg_number_cluster_selected_by_{method}"
+                ]
+                parameters[
+                    f"avg_abs_difference_{method}"
+                ] = extra_fields_to_report[f"avg_abs_difference_{method}"]
+                best_combination_for_ari[
+                    f"parameters_{method}"
+                ] = parameters.copy()
+                parameters.pop(
+                    f"avg_number_cluster_selected_by_{method}", None
+                )
+                parameters.pop(f"avg_abs_difference_{method}", None)
 
             avg = subset_training[f"avg_ari_{method}_old"].mean(axis=0)
-            if avg > best_result_ari[f"ari_{method}_old"]:
-                best_result_ari[f"ari_{method}_old"] = avg
-                best_result_ari[
+            if avg > best_combination_for_ari[f"ari_{method}_old"]:
+                best_combination_for_ari[f"ari_{method}_old"] = avg
+                best_combination_for_ari[
                     f"index_{method}_old"
                 ] = number_of_subset_of_words
-                best_result_ari[f"parameters_{method}_old"] = parameters
+                best_combination_for_ari[
+                    f"parameters_{method}_old"
+                ] = parameters
 
             avg = subset_training[f"avg_ari_{method}_new"].mean(axis=0)
-            if avg > best_result_ari[f"ari_{method}_new"]:
-                best_result_ari[f"ari_{method}_new"] = avg
-                best_result_ari[
+            if avg > best_combination_for_ari[f"ari_{method}_new"]:
+                best_combination_for_ari[f"ari_{method}_new"] = avg
+                best_combination_for_ari[
                     f"index_{method}_new"
                 ] = number_of_subset_of_words
-                best_result_ari[f"parameters_{method}_new"] = parameters
+                best_combination_for_ari[
+                    f"parameters_{method}_new"
+                ] = parameters
 
-    return best_result_ari, best_result_jsd
+            gold_data_graded_change, avg_jsd = prepare_data_for_spr(
+                subset_training, list_of_words, training_set, {"field": method}
+            )
+            spr, _ = spearmanr(gold_data_graded_change, avg_jsd)
+            if spr > best_combination_for_spr_lscd[f"spr_lscd_{method}"]:
+                best_combination_for_spr_lscd[f"spr_lscd_{method}"] = spr
+                best_combination_for_spr_lscd[
+                    f"index_{method}"
+                ] = number_of_subset_of_words
+                best_combination_for_spr_lscd[
+                    f"parameters_{method}"
+                ] = parameters
+
+    return best_combination_for_ari, best_combination_for_spr_lscd
 
 
 def eval_spectral_clustering(
@@ -167,27 +306,46 @@ def eval_spectral_clustering(
     best_configuration_for_ari_training_set,
     best_configuration_for_jsd_training_set,
     target_words: list[str],
+    exchange_optimized_parameters: bool = False,
 ) -> tuple[dict, float]:
-    start = best_configuration_for_jsd_training_set["index"] * 24
-    end = start + 24
-    subset_test_for_jsd = data.loc[start : end - 1, :].iloc[test_set].copy()
-    subset_test_for_jsd["avg_jsd"] = subset_test_for_jsd[
-        config["test"]["avg_jsd"]
-    ].mean(axis=1)
-    gold_change_graded, jsd = prepare_data_for_spr(
-        subset_test_for_jsd, target_words, test_set
-    )
-
-    spr, _ = spearmanr(gold_change_graded, jsd)
-
     results_ari = {}
+    results_spr_lscd = {}
 
-    cluster_validation_method = ["silhouette", "calinski", "eigengap"]
+    if exchange_optimized_parameters is True:
+        return eval_spectral_clustering_method_changing_parameters(
+            data,
+            test_set,
+            best_configuration_for_ari_training_set,
+            best_configuration_for_jsd_training_set,
+            target_words,
+        )
 
-    for validation_method in cluster_validation_method:
-        start = best_configuration_for_ari_training_set[
-            f"index_{validation_method}"
-        ]
+    for validation_method in CLUSTER_VALIDATION_METHODS:
+        start = (
+            best_configuration_for_jsd_training_set[
+                f"index_{validation_method}"
+            ]
+            * 24
+        )
+        end = start + 24
+        subset_test_for_spr_lscd = (
+            data.loc[start : end - 1, :].iloc[test_set].copy()
+        )
+        gold_change_graded, jsd = prepare_data_for_spr(
+            subset_test_for_spr_lscd,
+            target_words,
+            test_set,
+            {"field": validation_method},
+        )
+        spr, _ = spearmanr(gold_change_graded, jsd)
+        results_spr_lscd[f"spr_lscd_{validation_method}"] = spr
+
+        start = (
+            best_configuration_for_ari_training_set[
+                f"index_{validation_method}"
+            ]
+            * 24
+        )
         end = start + end
         subset_test_for_ari = (
             data.loc[start : end - 1, :].iloc[test_set].copy()
@@ -196,9 +354,12 @@ def eval_spectral_clustering(
             f"avg_ari_{validation_method}"
         ].mean(axis=0)
 
-        start = best_configuration_for_ari_training_set[
-            f"index_{validation_method}_old"
-        ]
+        start = (
+            best_configuration_for_ari_training_set[
+                f"index_{validation_method}_old"
+            ]
+            * 24
+        )
         end = start + end
         subset_test_for_ari = (
             data.loc[start : end - 1, :].iloc[test_set].copy()
@@ -207,9 +368,12 @@ def eval_spectral_clustering(
             f"avg_ari_{validation_method}_old"
         ].mean(axis=0)
 
-        start = best_configuration_for_ari_training_set[
-            f"index_{validation_method}_new"
-        ]
+        start = (
+            best_configuration_for_ari_training_set[
+                f"index_{validation_method}_new"
+            ]
+            * 24
+        )
         end = start + end
         subset_test_for_ari = (
             data.loc[start : end - 1, :].iloc[test_set].copy()
@@ -218,25 +382,30 @@ def eval_spectral_clustering(
             f"avg_ari_{validation_method}_new"
         ].mean(axis=0)
 
-    return results_ari, spr
+    return results_ari, results_spr_lscd
 
 
 def train(
     method: str, training_set: list[int], target_words: list[str]
 ) -> tuple[dict, dict]:
-    config = load_config_file()["5-fold-cv"]
-    data = pd.read_csv(f"results_whole_dataset/{method}.csv")
+    config = CONFIG["5-fold-cv"]
+    data = pd.read_csv(f"{V2}/results_whole_dataset/{method}.csv")
+    data = get_avg_number_clusters_predicted(data, method)
     if method == "spectral_clustering":
         return train_spectral_clustering_method(
             data, config, training_set, target_words
         )
 
-    best_result_ari = {
+    best_combination_for_ari = {
         "parameters": {},
         "ari": 0.0,
         "index": -1,
     }
-    best_result_jsd = {"parameters": {}, "jsd": 0.0, "index": -1}
+    best_combination_for_spr_lscd = {
+        "parameters": {},
+        "spr_lscd": 0.0,
+        "index": -1,
+    }
     number_of_subset_of_words = -1
 
     for set_of_words in splitted_data(data, 24):
@@ -256,21 +425,30 @@ def train(
         )
         spr, _ = spearmanr(gold_change_graded, jsd)
 
-        if avg_ari_training_set > best_result_ari["ari"]:
-            best_result_ari["ari"] = avg_ari_training_set
-            parameters = F(subset_training["parameters_r1"].to_list()[0])
-            parameters.pop("word", None)
-            best_result_ari["parameters"] = parameters
-            best_result_ari["index"] = number_of_subset_of_words
+        parameters = F(subset_training["parameters_r1"].to_list()[0])
+        parameters.pop("word", None)
+        try:
+            parameters["hyperparameter"] = subset_training[
+                "hyperparameter"
+            ].to_list()[0]
+        except Exception:
+            pass
 
-        if spr > best_result_jsd["jsd"]:
-            best_result_jsd["jsd"] = spr
-            parameters = F(subset_training["parameters_r1"].to_list()[0])
-            parameters.pop("word", None)
-            best_result_jsd["parameters"] = parameters
-            best_result_jsd["index"] = number_of_subset_of_words
+        parameters = get_extra_fields_to_report(
+            subset_training, method, parameters.copy()
+        )
 
-    return best_result_ari, best_result_jsd
+        if avg_ari_training_set > best_combination_for_ari["ari"]:
+            best_combination_for_ari["ari"] = avg_ari_training_set
+            best_combination_for_ari["parameters"] = parameters
+            best_combination_for_ari["index"] = number_of_subset_of_words
+
+        if spr > best_combination_for_spr_lscd["spr_lscd"]:
+            best_combination_for_spr_lscd["spr_lscd"] = spr
+            best_combination_for_spr_lscd["parameters"] = parameters
+            best_combination_for_spr_lscd["index"] = number_of_subset_of_words
+
+    return best_combination_for_ari, best_combination_for_spr_lscd
 
 
 def eval(
@@ -279,12 +457,14 @@ def eval(
     best_configuration_for_ari_training_set,
     best_configuration_for_jsd_training_set,
     target_words: list[str],
+    exchange_optimized_parameters: bool = False,
 ) -> tuple[float, float]:
-    config = load_config_file()["5-fold-cv"]
-    data = pd.read_csv(f"results_whole_dataset/{method}.csv")
+    config = CONFIG["5-fold-cv"]
+    data = pd.read_csv(f"{V2}/results_whole_dataset/{method}.csv")
 
     if method == "spectral_clustering":
         data = get_avg_ari_subset_words_sc(data, config)
+        data = get_avg_jsd_subset_words_sc(data, config)
         return eval_spectral_clustering(
             data,
             test_set,
@@ -292,16 +472,25 @@ def eval(
             best_configuration_for_ari_training_set,
             best_configuration_for_jsd_training_set,
             target_words,
+            exchange_optimized_parameters,
         )
 
-    start = best_configuration_for_ari_training_set["index"] * 24
+    if exchange_optimized_parameters is True:
+        start = best_configuration_for_jsd_training_set["index"] * 24
+    else:
+        start = best_configuration_for_ari_training_set["index"] * 24
+
     end = start + 24
     subset_test_for_ari = data.loc[start : end - 1, :].iloc[test_set].copy()
     subset_test_for_ari["avg_ari"] = subset_test_for_ari[
         config["test"]["avg_ari"]
     ].mean(axis=1)
 
-    start = best_configuration_for_jsd_training_set["index"] * 24
+    if exchange_optimized_parameters is True:
+        start = best_configuration_for_ari_training_set["index"] * 24
+    else:
+        start = best_configuration_for_jsd_training_set["index"] * 24
+
     end = start + 24
     subset_test_for_jsd = data.loc[start : end - 1, :].iloc[test_set].copy()
     subset_test_for_jsd["avg_jsd"] = subset_test_for_jsd[
@@ -332,8 +521,10 @@ def get_fields_to_report_for_spectral_clustering():
 def calculate_results_for_spectral_clustering_method(
     avg_ari_for_spectral_clustering: dict, result_avg_ari: dict
 ):
-    config = load_config_file()["5-fold-cv"]
-    fields = config["spectral_clustering"].keys()
+    config = CONFIG["5-fold-cv"]
+    fields = config["spectral_clustering"][
+        "calculate_results_for_spectral_clustering_method"
+    ]
     for field in fields:
         avg_ari_for_spectral_clustering[field] += result_avg_ari[field]
 
@@ -342,39 +533,22 @@ def calculate_average(
     results_per_method: dict, methods: list[str], k_fold: int
 ):
     for m in methods:
-        results_per_method[m]["spr_lscd"] = float(
-            results_per_method[m]["spr_lscd"] / k_fold
-        )
         if m != "spectral_clustering":
             results_per_method[m]["ari"] = float(
                 results_per_method[m]["ari"] / k_fold
             )
+            results_per_method[m]["spr_lscd"] = float(
+                results_per_method[m]["spr_lscd"] / k_fold
+            )
         else:
-            config = load_config_file()["5-fold-cv"]
-            fields = config["spectral_clustering"].keys()
+            config = CONFIG["5-fold-cv"]
+            fields = config["spectral_clustering"][
+                "calculate_results_for_spectral_clustering_method"
+            ]
             for field in fields:
-                results_per_method[m]["ari"][field] = float(
-                    results_per_method[m]["ari"][field] / k_fold
+                results_per_method[m][field] = float(
+                    results_per_method[m][field] / k_fold
                 )
-
-
-def present_results(results_per_method: dict, methods: list[str]):
-    config = load_config_file()["5-fold-cv"]
-    fields = config["spectral_clustering"].keys()
-
-    for m in methods:
-        print(f"{m}")
-        print(f"    Spr_LSCD: {results_per_method[m]['spr_lscd']}")
-
-        if m != "spectral_clustering":
-            print(f"    ARI: {results_per_method[m]['ari']}")
-        else:
-            for field in fields:
-                print(
-                    f"    {field.upper()}: {results_per_method[m]['ari'][field]}"
-                )
-
-        print()
 
 
 def aux(results_per_method, key, f_out: TextIO):
@@ -383,29 +557,40 @@ def aux(results_per_method, key, f_out: TextIO):
     f_out.write("\n")
 
 
-def present_parameters_for_spectral_clustering(
-    results_per_method: dict, f_out: TextIO
+def save_parameters_for_spectral_clustering(
+    results_per_method: dict, metric: str, f_out: TextIO
 ):
-    for m in [
-        "silhouette",
-        "calinski",
-        "eigengap",
-        "silhouette_old",
-        "calinski_old",
-        "eigengap_old",
-        "silhouette_new",
-        "calinski_new",
-        "eigengap_new",
-    ]:
+    assert metric == "ari" or metric == "spr_lscd", "expected [ari | spr_lscd]"
+
+    if metric == "ari":
+        fields = [
+            "silhouette",
+            "calinski",
+            "eigengap",
+            "silhouette_old",
+            "calinski_old",
+            "eigengap_old",
+            "silhouette_new",
+            "calinski_new",
+            "eigengap_new",
+        ]
+    else:
+        fields = [
+            "silhouette",
+            "calinski",
+            "eigengap",
+        ]
+
+    for m in fields:
         f_out.write(f"  {m}\n")
         aux(
-            results_per_method["spectral_clustering"]["ari"],
+            results_per_method["spectral_clustering"][metric],
             f"parameters_{m}",
             f_out,
         )
 
 
-def present_parameters_per_method(
+def save_parameters_per_method(
     parameters_per_method: dict, methods: list[str]
 ):
     with open(f"parameter-results-per-method.txt", "w") as f_out:
@@ -422,40 +607,60 @@ def present_parameters_per_method(
                             f"    Iter-{index+1}: {parameters['parameters']}\n"
                         )
             else:
-                present_parameters_for_spectral_clustering(
-                    parameters_per_method, f_out
+                save_parameters_for_spectral_clustering(
+                    parameters_per_method, "ari", f_out
                 )
 
             f_out.write(" Spr_LSCD:\n")
-            for index, parameters in enumerate(
-                parameters_per_method[m]["spr_lscd"]
-            ):
-                f_out.write(
-                    f"    Iter-{index+1}: {parameters['parameters']}\n"
-                )
+            if m != "spectral_clustering":
+                for index, parameters in enumerate(
+                    parameters_per_method[m]["spr_lscd"]
+                ):
+                    f_out.write(
+                        f"    Iter-{index+1}: {parameters['parameters']}\n"
+                    )
 
-            f_out.write("\n")
+                f_out.write("\n")
+            else:
+                save_parameters_for_spectral_clustering(
+                    parameters_per_method, "spr_lscd", f_out
+                )
 
 
 def print_results(
     no_fold: int,
     dev_ari: Union[dict, float],
     test_ari: Union[dict, float],
-    dev_spr_lscd: float,
-    test_spr_lscd: float,
+    dev_spr_lscd: Union[dict, float],
+    test_spr_lscd: Union[dict, float],
 ):
     print(f"  Fold-{no_fold}:")
-    if isinstance(dev_ari, dict):
-        print(f"    dev-ARI-Silhouette: {dev_ari['ari_silhouette']}", end=" ")
+    if isinstance(dev_ari, dict) and isinstance(dev_spr_lscd, dict):
+        print(f"    dev-ARI_Silhouette: {dev_ari['ari_silhouette']}", end=" ")
         print(f"test-ARI_Silhouette: {test_ari['avg_ari_silhouette']}")
-        print(f"    dev-Spr_LSCD: {dev_spr_lscd}", end=" ")
-        print(f"test-Spr_LSCD: {test_spr_lscd}")
+        print(
+            f"    dev-Spr_LSCD_Silhouette: {dev_spr_lscd['spr_lscd_silhouette']}",
+            end=" ",
+        )
+        print(
+            f"test-Spr_LSCD_Silhouette: {test_spr_lscd['spr_lscd_silhouette']}"
+        )
         print()
         print(f"    dev-ARI-Calinski: {dev_ari['ari_calinski']}", end=" ")
         print(f"test-ARI_Calinski: {test_ari['avg_ari_calinski']}")
+        print(
+            f"    dev-Spr_LSCD_Calinski: {dev_spr_lscd['spr_lscd_calinski']}",
+            end=" ",
+        )
+        print(f"test-Spr_LSCD_Calinski: {test_spr_lscd['spr_lscd_calinski']}")
         print()
         print(f"    dev-ARI-Eigengap: {dev_ari['ari_eigengap']}", end=" ")
         print(f"test-ARI_Eigengap: {test_ari['avg_ari_eigengap']}")
+        print(
+            f"    dev-Spr_LSCD_Eigengap: {dev_spr_lscd['spr_lscd_eigengap']}",
+            end=" ",
+        )
+        print(f"test-Spr_LSCD_Eigengap: {test_spr_lscd['spr_lscd_eigengap']}")
 
     else:
         print(f"    dev-ARI: {dev_ari}", end=" ")
