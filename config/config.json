@@ -65,106 +65,50 @@
     },
     "5-fold-cv": {
         "test": {
-            "avg_ari": [
-                "ari_r1",
-                "ari_r2",
-                "ari_r3",
-                "ari_r4",
-                "ari_r5"
-            ],
-            "avg_jsd": [
-                "jsd_r1",
-                "jsd_r2",
-                "jsd_r3",
-                "jsd_r4",
-                "jsd_r5"
-            ]
+            "avg_ari": {
+                "field": "ari_r"
+            },
+            "avg_jsd": {
+                "field": "jsd_r"
+            }
         },
         "spectral_clustering": {
-            "avg_ari_silhouette": [
-                "ari_silhouette_r1",
-                "ari_silhouette_r2",
-                "ari_silhouette_r3",
-                "ari_silhouette_r4",
-                "ari_silhouette_r5"
-            ],
-            "avg_ari_calinski": [
-                "ari_calinski_r1",
-                "ari_calinski_r2",
-                "ari_calinski_r3",
-                "ari_calinski_r4",
-                "ari_calinski_r5"
-            ],
-            "avg_ari_eigengap": [
-                "ari_eigengap_r1",
-                "ari_eigengap_r2",
-                "ari_eigengap_r3",
-                "ari_eigengap_r4",
-                "ari_eigengap_r5"
-            ],
-            "avg_ari_silhouette_old": [
-                "ari_silhouette_old_r1",
-                "ari_silhouette_old_r2",
-                "ari_silhouette_old_r3",
-                "ari_silhouette_old_r4",
-                "ari_silhouette_old_r5"
-            ],
-            "avg_ari_calinski_old": [
-                "ari_calinski_old_r1",
-                "ari_calinski_old_r2",
-                "ari_calinski_old_r3",
-                "ari_calinski_old_r4",
-                "ari_calinski_old_r5"
-            ],
-            "avg_ari_eigengap_old": [
-                "ari_eigengap_old_r1",
-                "ari_eigengap_old_r2",
-                "ari_eigengap_old_r3",
-                "ari_eigengap_old_r4",
-                "ari_eigengap_old_r5"
-            ],
-            "avg_ari_silhouette_new": [
-                "ari_silhouette_new_r1",
-                "ari_silhouette_new_r2",
-                "ari_silhouette_new_r3",
-                "ari_silhouette_new_r4",
-                "ari_silhouette_new_r5"
-            ],
-            "avg_ari_calinski_new": [
-                "ari_calinski_new_r1",
-                "ari_calinski_new_r2",
-                "ari_calinski_new_r3",
-                "ari_calinski_new_r4",
-                "ari_calinski_new_r5"
-            ],
-            "avg_ari_eigengap_new": [
-                "ari_eigengap_new_r1",
-                "ari_eigengap_new_r2",
-                "ari_eigengap_new_r3",
-                "ari_eigengap_new_r4",
-                "ari_eigengap_new_r5"
-            ],
-            "avg_jsd_silhouette": [
-                "jsd_silhouette_r1",
-                "jsd_silhouette_r2",
-                "jsd_silhouette_r3",
-                "jsd_silhouette_r4",
-                "jsd_silhouette_r5"
-            ],
-            "avg_jsd_calinski": [
-                "jsd_calinski_r1",
-                "jsd_calinski_r2",
-                "jsd_calinski_r3",
-                "jsd_calinski_r4",
-                "jsd_calinski_r5"
-            ],
-            "avg_jsd_eigengap": [
-                "jsd_eigengap_r1",
-                "jsd_eigengap_r2",
-                "jsd_eigengap_r3",
-                "jsd_eigengap_r4",
-                "jsd_eigengap_r5"
-            ],
+            "avg_ari_silhouette": {
+                "field": "ari_silhouette_r"
+            },
+            "avg_ari_calinski": {
+                "field": "ari_calinski_r"
+            },
+            "avg_ari_eigengap": {
+                "field": "ari_eigengap_r"
+            },
+            "avg_ari_silhouette_old": {
+                "field": "ari_silhouette_old_r"
+            },
+            "avg_ari_calinski_old": {
+                "field": "ari_calinski_old_r"
+            },
+            "avg_ari_eigengap_old": {
+                "field": "ari_eigengap_old_r"
+            },
+            "avg_ari_silhouette_new": {
+                "field": "ari_silhouette_new_r"
+            },
+            "avg_ari_calinski_new": {
+                "field": "ari_calinski_new_r"
+            },
+            "avg_ari_eigengap_new": {
+                "field": "ari_eigengap_new_r"
+            },
+            "avg_jsd_silhouette": {
+                "field": "jsd_silhouette_r"
+            },
+            "avg_jsd_calinski": {
+                "field": "jsd_calinski_r"
+            },
+            "avg_jsd_eigengap": {
+                "field": "jsd_eigengap_r"
+            },
             "calculate_results_for_spectral_clustering_method": [
                 "avg_ari_silhouette",
                 "avg_ari_calinski",
@@ -180,68 +124,40 @@
                 "spr_lscd_eigengap"
             ],
             "include_extra_information": {
-                "avg_number_cluster_selected_by_silhouette": [
-                    "number_cluster_selected_by_silhouette_r1",
-                    "number_cluster_selected_by_silhouette_r2",
-                    "number_cluster_selected_by_silhouette_r3",
-                    "number_cluster_selected_by_silhouette_r4",
-                    "number_cluster_selected_by_silhouette_r5"
-                ],
-                "avg_number_cluster_selected_by_calinski": [
-                    "number_cluster_selected_by_calinski_r1",
-                    "number_cluster_selected_by_calinski_r2",
-                    "number_cluster_selected_by_calinski_r3",
-                    "number_cluster_selected_by_calinski_r4",
-                    "number_cluster_selected_by_calinski_r5"
-                ],
-                "avg_number_cluster_selected_by_eigengap": [
-                    "number_cluster_selected_by_eigengap_r1",
-                    "number_cluster_selected_by_eigengap_r2",
-                    "number_cluster_selected_by_eigengap_r3",
-                    "number_cluster_selected_by_eigengap_r4",
-                    "number_cluster_selected_by_eigengap_r5"
-                ],
-                "avg_abs_difference_silhouette": [
-                    "abs_difference_silhouette_r1",
-                    "abs_difference_silhouette_r2",
-                    "abs_difference_silhouette_r3",
-                    "abs_difference_silhouette_r4",
-                    "abs_difference_silhouette_r5"
-                ],
-                "avg_abs_difference_calinski": [
-                    "abs_difference_calinski_r1",
-                    "abs_difference_calinski_r2",
-                    "abs_difference_calinski_r3",
-                    "abs_difference_calinski_r4",
-                    "abs_difference_calinski_r5"
-                ],
-                "avg_abs_difference_eigengap": [
-                    "abs_difference_eigengap_r1",
-                    "abs_difference_eigengap_r2",
-                    "abs_difference_eigengap_r3",
-                    "abs_difference_eigengap_r4",
-                    "abs_difference_eigengap_r5"
-                ],
-                "hyperparameter": ["score_path_r1"]
+                "avg_number_cluster_selected_by_silhouette": {
+                    "field": "number_cluster_selected_by_silhouette_r"
+                },
+                "avg_number_cluster_selected_by_calinski": {
+                    "field": "number_cluster_selected_by_calinski_r"
+                },
+                "avg_number_cluster_selected_by_eigengap": {
+                    "field": "number_cluster_selected_by_eigengap_r"
+                },
+                "avg_abs_difference_silhouette": {
+                    "field": "abs_difference_silhouette_r"
+                },
+                "avg_abs_difference_calinski": {
+                    "field": "abs_difference_calinski_r"
+                },
+                "avg_abs_difference_eigengap": {
+                    "field": "abs_difference_eigengap_r"
+                },
+                "hyperparameter": [
+                    "score_path_r1"
+                ]
             }
         },
         "non_spectral_clustering": {
             "include_extra_information": {
-                "avg_number_clusters_predicted": [
-                    "number_clusters_predicted_r1",
-                    "number_clusters_predicted_r2",
-                    "number_clusters_predicted_r3",
-                    "number_clusters_predicted_r4",
-                    "number_clusters_predicted_r5"
-                ],
-                "avg_abs_difference": [
-                    "abs_difference_r1",
-                    "abs_difference_r2",
-                    "abs_difference_r3",
-                    "abs_difference_r4",
-                    "abs_difference_r5"
-                ],
-                "hyperparameter": ["hyperparameter"]
+                "avg_number_clusters_predicted": {
+                    "field": "number_clusters_predicted_r"
+                },
+                "avg_abs_difference": {
+                    "field": "abs_difference_r"
+                },
+                "hyperparameter": [
+                    "hyperparameter"
+                ]
             }
         }
     }
